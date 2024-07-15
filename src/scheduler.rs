@@ -6,12 +6,12 @@ use native_tls::TlsConnector;
 use std::env;
 use cron::Schedule;
 use std::str::FromStr;
-use tokio::time::{sleep};
-use chrono::{Duration, Utc};
+use tokio::time::sleep;
+use chrono::Utc;
 
 pub async fn run_scheduler() -> anyhow::Result<()> {
     // Получаем расписание из переменной окружения или используем значение по умолчанию
-    let cron_expression = env::var("CRON_SCHEDULE").unwrap_or_else(|_| "0 */4 * * * *".to_string());
+    let cron_expression = env::var("CRON_SCHEDULE").unwrap_or_else(|_| "* * * * * *".to_string());
     let schedule = Schedule::from_str(&cron_expression)?;
 
     let mut next = schedule.upcoming(Utc).next().unwrap();
@@ -32,7 +32,7 @@ pub async fn run_scheduler() -> anyhow::Result<()> {
 async fn check_emails() -> anyhow::Result<()> {
     let imap_server = env::var("IMAP_SERVER")?;
     let imap_port: u16 = env::var("IMAP_PORT")?.parse()?;
-    let imap_username = env::var("IMAP_USERNAME")?;
+    let imap_username = env::var("IMAP_EMAIL")?;
     let imap_password = env::var("IMAP_PASSWORD")?;
     let folder = env::var("IMAP_FOLDER").unwrap_or_else(|_| "INBOX".to_string());
     let folder_sent: String = env::var("IMAP_SENT_FOLDER").unwrap_or_else(|_| "Sent".to_string());
