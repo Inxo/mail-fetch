@@ -35,6 +35,7 @@ async fn check_emails() -> anyhow::Result<()> {
     let imap_username = env::var("IMAP_USERNAME")?;
     let imap_password = env::var("IMAP_PASSWORD")?;
     let folder = env::var("IMAP_FOLDER").unwrap_or_else(|_| "INBOX".to_string());
+    let folder_sent: String = env::var("IMAP_SENT_FOLDER").unwrap_or_else(|_| "Sent".to_string());
 
     // Устанавливаем соединение с базой данных
     let pool = database::connect().await?;
@@ -46,15 +47,11 @@ async fn check_emails() -> anyhow::Result<()> {
     let tls = TlsConnector::builder().build()?;
     let mut imap_session = imap_client::connect(&imap_server, imap_port, &imap_username, &imap_password, &tls)?;
 
-    // Получение времени 4 часа назад
-    let since = Utc::now() - Duration::hours(24);
-    let since_str = since.format("%d-%b-%Y").to_string();
-
     // Обработка входящих писем
-    email_processor::process_emails(&mut imap_session, &pool, "INBOX").await?;
+    email_processor::process_emails(&mut imap_session, &pool, &folder).await?;
 
     // Обработка отправленных писем
-    email_processor::process_emails(&mut imap_session, &pool, "Sent").await?;
+    email_processor::process_emails(&mut imap_session, &pool, &folder_sent).await?;
 
     // Завершение сессии
     imap_session.logout()?;
