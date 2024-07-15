@@ -1,0 +1,15 @@
+[package]
+name = "email_service"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dotenv = "0.15"
+imap = "2.3"
+native-tls = "0.2"
+sqlx = { version = "0.6", features = ["sqlite", "runtime-tokio-native-tls"] }
+tokio = { version = "1", features = ["full"] }
+chrono = "0.4"
+mailparse = "0.10"
+anyhow = "1.0"
+html2text = "0.4"
