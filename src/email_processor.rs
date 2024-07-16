@@ -6,14 +6,12 @@ use std::collections::HashSet;
 use anyhow::Context;
 use html2text::from_read;
 
-// Функция для получения значения заголовка
 fn get_header_value(headers: &[MailHeader], name: &str) -> Option<String> {
     headers.iter()
         .find(|header| header.get_key().map_or(false, |k| k.eq_ignore_ascii_case(name)))
         .and_then(|header| header.get_value().ok())
 }
 
-// Рекурсивная функция для получения текста сообщения
 fn get_body_text(mail: &ParsedMail) -> String {
     if mail.subparts.is_empty() {
         if mail.ctype.mimetype == "text/plain" {
@@ -37,14 +35,11 @@ fn get_body_text(mail: &ParsedMail) -> String {
 }
 
 pub async fn process_emails(imap_session: &mut Session<TlsStream<std::net::TcpStream>>, pool: &SqlitePool, folder: &str) -> anyhow::Result<()> {
-    // Открытие папки
     imap_session.select(folder)?;
 
-    // Получение времени 4 часа назад
-    let since = chrono::Utc::now() - chrono::Duration::hours(4);
+    let since = chrono::Utc::now() - chrono::Duration::hours(24);
     let since_str = since.format("%d-%b-%Y").to_string();
 
-    // Поиск всех писем за последние 4 часа
     let search_query = format!("SINCE {}", since_str);
     let messages = imap_session.search(&search_query).context("Failed to search emails")?;
     let message_ids: HashSet<_> = messages.iter().collect();
@@ -62,11 +57,9 @@ pub async fn process_emails(imap_session: &mut Session<TlsStream<std::net::TcpSt
                 println!("{}", body);
                 let message_id = get_header_value(&email.headers, "Message-ID").unwrap_or_default();
 
-                // Проверка, что письмо еще не сохранено в базе данных
                 let exists = crate::database::email_exists(pool, &message_id, folder).await?;
 
                 if !exists {
-                    // Сохранение письма в базу данных
                     crate::database::save_email(pool, &sender, &recipient, &subject, &body, &message_id, folder).await?;
                 }
             }

@@ -1,14 +1,11 @@
 use sqlx::sqlite::SqlitePool;
 use sqlx::sqlite::SqliteConnectOptions;
-// use sqlx::sqlite::SqlitePoolOptions;
 
 pub async fn connect() -> anyhow::Result<SqlitePool> {
-    // Создаем опции подключения к SQLite
     let options = SqliteConnectOptions::new()
-        .filename("emails.db")  // Указываем имя файла базы данных SQLite
-        .create_if_missing(true);  // Создаем файл, если он не существует
+        .filename("emails.db")  
+        .create_if_missing(true);  
 
-    // Устанавливаем соединение с базой данных
     let pool = SqlitePool::connect_with(options).await?;
     Ok(pool)
 }
