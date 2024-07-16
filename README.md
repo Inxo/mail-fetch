@@ -45,23 +45,6 @@ IMAP_SENT_FOLDER=Sent
 CRON_SCHEDULE=0 */4 * * * * # Проверка каждые 4 часа
 ```
 
-4. Создайте папку `migrations` и добавьте в нее миграцию для создания таблицы `emails`.
-
-### `migrations/V1__create_emails_table.sql`
-
-```sql
-CREATE TABLE emails (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sender TEXT NOT NULL,
-    recipient TEXT NOT NULL,
-    subject TEXT,
-    body TEXT,
-    message_id TEXT NOT NULL,
-    folder TEXT NOT NULL,
-    UNIQUE(message_id, folder)
-);
-```
-
 ## Использование
 
 Запустите приложение:
